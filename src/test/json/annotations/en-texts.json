@@ -1,0 +1,23 @@
+{
+  "contactEmail": "cbadenes@fi.upm.es",
+  "dataSink": {
+    "format": "SOLR_CORE",
+    "url": "http://solr:8983/solr/documents"
+  },
+  "dataSource": {
+    "dataFields": {
+      "id": "id",
+      "name": "name_s",
+      "labels":[ "labels_t" ],
+      "text": [
+        "txt_t"
+      ]
+    },
+    "filter": "-topics0_t:[* TO *] && lang_s:en",
+    "format": "SOLR_CORE",
+    "offset": 0,
+    "size": -1,
+    "url": "http://solr:8983/solr/documents"
+  },
+  "modelEndpoint": "http://jrc-en-model:7777"
+}

@@ -1,0 +1,11 @@
+<div class="modal-header">
+  <button source="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+  <h3>{{share.title}} <small>shareable link</small></h3>
+</div>
+<div class="modal-body">
+  <label>Share this dashboard with this URL</label>
+  <input ng-model='share.link' source="text" style="width:90%" onclick="this.select()" onfocus="this.select()" ng-change="share = dashboard.share_link(share.title,share.source,share.id)">
+</div>
+<div class="modal-footer">
+  <button source="button" class="btn btn-success" ng-click="dismiss();$broadcast('render')">Close</button>
+</div>
