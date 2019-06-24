@@ -62,7 +62,7 @@ services:
      - ./tmp:/librairy
      - /var/run/docker.sock:/var/run/docker.sock
   search-api:
-     image: librairy/search-api:1.0
+     image: librairy/search-api:1.2
      ports:
       - "8080:7777"
      environment:

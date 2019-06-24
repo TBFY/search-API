@@ -21,19 +21,19 @@ public class ItemsRequest {
 
     private String name;
 
-    private String term;
+    private String terms;
 
     private Integer size;
 
     public ItemsRequest() {
     }
 
-    public ItemsRequest(String text, String lang, String source, String name, String term, Integer size) {
+    public ItemsRequest(String text, String lang, String source, String name, String terms, Integer size) {
         this.text = text;
         this.lang = lang;
         this.source = source;
         this.name = name;
-        this.term = term;
+        this.terms = terms;
         this.size = size;
     }
 
@@ -69,12 +69,12 @@ public class ItemsRequest {
         this.name = name;
     }
 
-    public String getTerm() {
-        return term;
+    public String getTerms() {
+        return terms;
     }
 
-    public void setTerm(String term) {
-        this.term = term;
+    public void setTerms(String terms) {
+        this.terms = terms;
     }
 
     public Integer getSize() {

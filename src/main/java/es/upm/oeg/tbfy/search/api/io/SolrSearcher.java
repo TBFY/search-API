@@ -84,7 +84,7 @@ public class SolrSearcher {
 
             String query = "*:*";
 
-            queryParams.put("txt_t","[* TO *]");
+            //queryParams.put("txt_t","[* TO *]");
 
             if (!queryParams.isEmpty()){
                 query = queryParams.entrySet().stream().map(e -> e.getKey()+":"+e.getValue()).collect(Collectors.joining(" AND "));
