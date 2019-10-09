@@ -4,7 +4,8 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 ![Java](https://img.shields.io/badge/java-v1.8+-blue.svg)
 ![Maven](https://img.shields.io/badge/maven-v3.0+-blue.svg)
-[![Build Status](https://jitci.com/gh/TBFY/search-API/svg)](https://jitci.com/gh/TBFY/search-API)
+[![Build Status](https://travis-ci.org/TBFY/search-API.svg?branch=master)](https://travis-ci.org/TBFY/search-API)
+[![Release Status](https://jitci.com/gh/TBFY/search-API/svg)](https://jitci.com/gh/TBFY/search-API)
 [![GitHub Issues](https://img.shields.io/github/issues/TBFY/search-API.svg)](https://github.com/TBFY/search-API/issues)
 [![License](https://img.shields.io/badge/license-Apache2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
