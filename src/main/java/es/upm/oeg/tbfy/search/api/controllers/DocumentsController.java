@@ -115,7 +115,7 @@ public class DocumentsController {
             @ApiResponse(code = 200, message = "Success", response = Item.class, responseContainer = "list"),
     })
     @RequestMapping(value = "/{id:.+}/items", method = RequestMethod.GET, produces = "application/json")
-    public ResponseEntity<List<Item>> getDocument(
+    public ResponseEntity<List<Item>> getItems(
             @ApiParam(value = "id", required = true) @PathVariable String id,
             @RequestParam(defaultValue = "") String name,
             @RequestParam(defaultValue = "") String lang,

@@ -232,7 +232,7 @@ public class LibrAIryClient {
                 JSONObject jsonItem = list.getJSONObject(i);
                 Item item = new Item();
                 item.setId(jsonItem.getString("id"));
-                item.setName(jsonItem.getString("name"));
+                if (jsonItem.has("name")) item.setName(jsonItem.getString("name"));
                 item.setScore(jsonItem.getDouble("score"));
 
                 items.add(item);

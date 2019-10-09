@@ -30,7 +30,7 @@ services:
       - NLP_ENDPOINT=nlp
       - JAVA_OPTS=-Xmx128m
   jrc-de-model:
-    image: librairy/jrc-de-model:1.3
+    image: librairy/jrc-de-model:1.4
     ports:
      - "8088:7777"
     environment:
