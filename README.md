@@ -54,10 +54,7 @@ In order to obtain only documents in Spanish, just add `lang=es` to the json:
 ## Last Stable Release [![](https://jitpack.io/v/TBFY/search-API.svg)](https://jitpack.io/#TBFY/search-API)
 This tool is part of the [librAIry](http://librairy.linkeddata.es) ecosystem, and needs [librAIry-API](https://github.com/librairy/api) for deployment.
 
-* It can be booted from its Docker image:
-```bash
-docker run -p 8080:7777 librairy/search-api
-```
+* It can start as a service via [docker-compose.yml](https://github.com/TBFY/search-API/blob/master/docker-compose.yml):
 * Or through Maven dependencies:
     1. Add the JitPack repository to your build file   
     ```xml
