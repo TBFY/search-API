@@ -14,7 +14,7 @@
 ## Basic Overview
 
 Explore collections of multilingual public procurement data through a Restful API:
-- `/documents` : list of existing documents 
+- `/documents` : list of existing documents
 - `/documents/{id}` : details of a document
 - `/documents/{id}/items` : similar documents
 
@@ -76,4 +76,4 @@ This tool is part of the [librAIry](http://librairy.linkeddata.es) ecosystem, an
      ```
 
 ## Contributing
-Please take a look at our [contributing](https://github.com/TBFY/harvester/blob/master/CONTRIBUTING.md) guidelines if you're interested in helping!
+Please take a look at our [contributing](https://github.com/TBFY/general/blob/master/guides/how-to-contribute.md) guidelines if you're interested in helping!
