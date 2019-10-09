@@ -442,6 +442,14 @@ http://www.w3.org/2001/XMLSchema-instance ">
 			</snapshots>
 		</repository>
 
+		<repository>
+			<id>api-facade</id>
+			<url>https://raw.github.com/librairy/api-facade/mvn-repo/</url>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
+		</repository>
 
 	</repositories>
 
