@@ -52,7 +52,7 @@ In order to obtain only documents in Spanish, just add `lang=es` to the json:
 }
 ```
 
-## Last Stable Release [![](https://jitpack.io/v/TBFY/search-API.svg)](https://jitpack.io/#TBFY/search-API)
+## Lastest Stable Release [![](https://jitpack.io/v/TBFY/search-API.svg)](https://jitpack.io/#TBFY/search-API)
 This tool is part of the [librAIry](http://librairy.linkeddata.es) ecosystem, and needs [librAIry-API](https://github.com/librairy/api) for deployment.
 
 * It can start as a service via [docker-compose.yml](https://github.com/TBFY/search-API/blob/master/docker-compose.yml):
