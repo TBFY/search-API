@@ -8,6 +8,7 @@
 [![Release Status](https://jitci.com/gh/TBFY/search-API/svg)](https://jitci.com/gh/TBFY/search-API)
 [![GitHub Issues](https://img.shields.io/github/issues/TBFY/search-API.svg)](https://github.com/TBFY/search-API/issues)
 [![License](https://img.shields.io/badge/license-Apache2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![DOI](https://zenodo.org/badge/188234088.svg)](https://zenodo.org/badge/latestdoi/188234088)
 
 
 
