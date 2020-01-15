@@ -1,4 +1,4 @@
-<p align="center"><img width=15% src="https://github.com/TBFY/general/blob/master/figures/tbfy-logo.png"></p>
+<p align="center"><img width=50% src="https://github.com/TBFY/general/blob/master/figures/tbfy-logo.png"></p>
 <p align="center"><img width=40% src="https://github.com/TBFY/search-API/blob/master/logo.png"></p>
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -8,6 +8,7 @@
 [![Release Status](https://jitci.com/gh/TBFY/search-API/svg)](https://jitci.com/gh/TBFY/search-API)
 [![GitHub Issues](https://img.shields.io/github/issues/TBFY/search-API.svg)](https://github.com/TBFY/search-API/issues)
 [![License](https://img.shields.io/badge/license-Apache2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![DOI](https://zenodo.org/badge/188234088.svg)](https://zenodo.org/badge/latestdoi/188234088)
 
 
 
@@ -52,7 +53,7 @@ In order to obtain only documents in Spanish, just add `lang=es` to the json:
 }
 ```
 
-## Last Stable Release [![](https://jitpack.io/v/TBFY/search-API.svg)](https://jitpack.io/#TBFY/search-API)
+## Lastest Stable Release [![](https://jitpack.io/v/TBFY/search-API.svg)](https://jitpack.io/#TBFY/search-API)
 This tool is part of the [librAIry](http://librairy.linkeddata.es) ecosystem, and needs [librAIry-API](https://github.com/librairy/api) for deployment.
 
 * It can start as a service via [docker-compose.yml](https://github.com/TBFY/search-API/blob/master/docker-compose.yml):
