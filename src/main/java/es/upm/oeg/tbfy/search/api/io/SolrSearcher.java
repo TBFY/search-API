@@ -1,6 +1,8 @@
 package es.upm.oeg.tbfy.search.api.io;
 
 import com.google.common.base.Strings;
+import es.upm.oeg.tbfy.search.api.model.Document;
+import es.upm.oeg.tbfy.search.api.model.InternalDocument;
 import es.upm.oeg.tbfy.search.api.model.QueryDocument;
 import es.upm.oeg.tbfy.search.api.model.QueryDocumentList;
 import org.apache.http.auth.AuthScope;
@@ -16,6 +18,7 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.CursorMarkParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +28,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -38,13 +42,15 @@ public class SolrSearcher {
     private  SolrClient solrClient;
 
     @Value("#{environment['SOLR_ENDPOINT']?:'${solr.endpoint}'}")
-    String url;
+    public String url;
 
     @Value("#{environment['SOLR_USERNAME']?:'${solr.username}'}")
-    String username;
+    public String username;
 
     @Value("#{environment['SOLR_PASSWORD']?:'${solr.password}'}")
-    String password;
+    public String password;
+
+    public AtomicInteger counter;
 
     @PostConstruct
     public void setup(){
@@ -59,6 +65,7 @@ public class SolrSearcher {
             client.setDefaultCredentialsProvider(provider);
         }
 
+        this.counter        = new AtomicInteger(0);
 
         this.solrClient     = new HttpSolrClient.Builder(url).withHttpClient(client.build()).build();
     }
@@ -144,5 +151,48 @@ public class SolrSearcher {
         }
 
         return queryDocuments;
+    }
+
+
+    public boolean save(InternalDocument doc){
+
+        try {
+            SolrInputDocument document = new SolrInputDocument();
+            document.addField("id",doc.getId());
+            document.addField("name_s",doc.getName());
+            document.addField("txt_t",doc.getText());
+            document.addField("size_i", Strings.isNullOrEmpty(doc.getText())? 0 : doc.getText().length());
+            document.addField("labels_t",doc.getTags());
+            document.addField("format_s",doc.getFormat());
+            document.addField("lang_s",doc.getLanguage());
+            document.addField("source_s",doc.getSource());
+            document.addField("date_dt",doc.getDate());
+
+            if (!Strings.isNullOrEmpty(doc.getTopics0())) document.addField("topics0_t",doc.getTopics0());
+            if (!Strings.isNullOrEmpty(doc.getTopics1())) document.addField("topics1_t",doc.getTopics1());
+            if (!Strings.isNullOrEmpty(doc.getTopics2())) document.addField("topics2_t",doc.getTopics2());
+
+            solrClient.add(document);
+
+            if (counter.incrementAndGet() % 100 == 0) {
+                LOG.info(counter.get() + " documents saved");
+                solrClient.commit();
+            }
+
+        } catch (Exception e) {
+            LOG.error("Unexpected error", e);
+            return false;
+        }
+
+        return true;
+    }
+
+
+    public void commit (){
+        try {
+            solrClient.commit();
+        } catch (Exception e) {
+            LOG.error("Unexpected error saving documents",e);
+        }
     }
 }

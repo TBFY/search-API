@@ -37,44 +37,6 @@ public class ItemsServiceController {
 
     }
 
-//    @ApiOperation(value = "similar docs to given a document", nickname = "getItemsById", response=Item.class, responseContainer = "list")
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 200, message = "Success", response = Item.class, responseContainer = "list"),
-//    })
-//    @RequestMapping(value = "/{id:.+}", method = RequestMethod.GET, produces = "application/json")
-//    public ResponseEntity<List<Item>> getItemsById(
-//            @ApiParam(value = "id", required = true) @PathVariable String id,
-//            @RequestParam(defaultValue = "") String name,
-//            @RequestParam(defaultValue = "") String lang,
-//            @RequestParam(defaultValue = "") String terms,
-//            @RequestParam(defaultValue = "") String source,
-//            @RequestParam(defaultValue = "10") Integer size
-//    )  {
-//        try {
-//
-//            Filter filter = new Filter();
-//            filter.setName(name);
-//            filter.setLang(lang);
-//            filter.setText(terms);
-//            filter.setSource(source);
-//            filter.setSize(size);
-//
-//            List<Item> items = itemsService.getItemsById(id, filter);
-//
-//            HttpHeaders responseHeaders = new HttpHeaders();
-//
-//            return ResponseEntity.ok()
-//                    .headers(responseHeaders)
-//                    .body(items);
-//        } catch (RuntimeException e) {
-//            LOG.error("Runtime Error: " + e.getMessage());
-//            return new ResponseEntity<List<Item>>(HttpStatus.NOT_FOUND);
-//        } catch (Exception e) {
-//            LOG.error("IO Error", e);
-//            return new ResponseEntity<List<Item>>(HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
-
 
     @ApiOperation(value = "similar docs to a given text", nickname = "getItemsByText", response=Item.class, responseContainer = "list")
     @ApiResponses(value = {

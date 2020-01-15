@@ -4,20 +4,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Document {
+public class DocumentBody {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Document.class);
-
-    private String id;
+    private static final Logger LOG = LoggerFactory.getLogger(DocumentBody.class);
 
     private String name;
 
@@ -29,15 +22,7 @@ public class Document {
 
     private String tags;
 
-    public Document() {
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
+    public DocumentBody() {
     }
 
     public String getName() {

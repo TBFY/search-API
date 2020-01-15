@@ -31,8 +31,8 @@ public class BasicAuthController extends SwaggerConfig {
                 .apiInfo(metadata())
                 .directModelSubstitute(org.joda.time.LocalDate.class, java.sql.Date.class)
                 .directModelSubstitute(org.joda.time.DateTime.class, java.util.Date.class)
-                .securitySchemes(newArrayList(basicAuth()))
-                .securityContexts(newArrayList(securityContext()))
+                //.securitySchemes(newArrayList(basicAuth()))
+                //.securityContexts(newArrayList(securityContext()))
                 ;
     }
 

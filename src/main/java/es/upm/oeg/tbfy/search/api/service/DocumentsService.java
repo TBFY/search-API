@@ -1,7 +1,11 @@
 package es.upm.oeg.tbfy.search.api.service;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import es.upm.oeg.tbfy.search.api.executors.ParallelExecutor;
+import es.upm.oeg.tbfy.search.api.io.KGAPIClient;
+import es.upm.oeg.tbfy.search.api.io.LibrAIryClient;
 import es.upm.oeg.tbfy.search.api.io.SolrSearcher;
 import es.upm.oeg.tbfy.search.api.model.*;
 import org.slf4j.Logger;
@@ -9,7 +13,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -21,10 +28,19 @@ public class DocumentsService {
     private static final Logger LOG = LoggerFactory.getLogger(DocumentsService.class);
 
     @Autowired
+    KGAPIClient kgapiClient;
+
+    @Autowired
+    LibrAIryClient librAIryClient;
+
+    @Autowired
     SolrSearcher solrSearcher;
 
+    @Autowired
+    LanguageService languageService;
 
-    public Optional<Document> getDocument(String id, Boolean text){
+
+    public Optional<InternalDocument> getDocument(String id, Boolean text){
 
         List<String> fields = new ArrayList<>(Arrays.asList("format_s","labels_t","lang_s","source_s","name_s","date_dt","topics0_t","topics1_t","topics2_t"));
 
@@ -38,7 +54,7 @@ public class DocumentsService {
         Map<String, Object> qdd = qd.getData();
 
 
-        Document document = new Document();
+        InternalDocument document = new InternalDocument();
         document.setId(qd.getId());
         if (qdd.containsKey("format_s"))  document.setFormat(String.valueOf(qdd.get("format_s")));
         if (qdd.containsKey("lang_s"))  document.setLanguage(String.valueOf(qdd.get("lang_s")));
@@ -102,4 +118,105 @@ public class DocumentsService {
 
         return new DocumentSummaryList(documents, result.getCursor(), result.getTotal());
     }
+
+    public boolean add(InternalDocument document, Boolean commit){
+
+        try{
+
+            Optional<String> lang = languageService.getLanguage(document.getText());
+            if (!lang.isPresent()) {
+                LOG.warn("Language not supported");
+                return false;
+            }
+            document.setLanguage(lang.get());
+
+            Map<String, String> topics = librAIryClient.getTopics(document.getText(), document.getLanguage());
+            if (!Strings.isNullOrEmpty(topics.get("0"))) document.setTopics0(topics.get("0"));
+            if (!Strings.isNullOrEmpty(topics.get("1"))) document.setTopics1(topics.get("1"));
+            if (!Strings.isNullOrEmpty(topics.get("2"))) document.setTopics2(topics.get("2"));
+
+            solrSearcher.save(document);
+            if (commit) solrSearcher.commit();
+            LOG.info("Document '" + document.getId()+"' saved");
+
+            return true;
+        }catch (Exception e){
+            LOG.error("Unexpected error",e);
+            return false;
+        }
+
+    }
+
+    public boolean addAll(){
+
+        try{
+            int counter = 0;
+            int size = 50;
+            int offset = 0;
+            boolean completed = false;
+            Instant start = Instant.now();
+
+            ParallelExecutor executor = new ParallelExecutor();
+
+            while(!completed){
+                // read tenders
+                List<String> tenders = kgapiClient.getTenders(size, offset++);
+
+                completed = tenders.size() < size;
+
+                //TODO parallel
+                for(String tId : tenders){
+                    // save documents for each tender
+                    final String tenderId = tId;
+
+                    executor.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            try{
+                                Optional<Tender> tender = kgapiClient.getTender(tenderId);
+                                if (!tender.isPresent()){
+                                    LOG.warn("No tender found by id: " + tId);
+                                    return;
+                                }
+
+                                InternalDocument tenderDocument = new InternalDocument();
+
+                                Tender tenderValue = tender.get();
+                                if (Strings.isNullOrEmpty(tenderValue.getText())) return;
+
+                                tenderDocument.setId(tId);
+                                tenderDocument.setFormat("kg");
+                                tenderDocument.setName(tenderValue.getName());
+                                tenderDocument.setText(tenderValue.getText());
+                                tenderDocument.setDate(DateService.now());
+                                tenderDocument.setSource("tender");
+
+                                add(tenderDocument, false);
+                            }catch (Exception e){
+                                LOG.error("Unexpected error on tender: " + tenderId, e);
+                            }
+                        }
+                    });
+                }
+                counter += tenders.size();
+            }
+
+            executor.awaitTermination(5, TimeUnit.MINUTES);
+
+            Instant end = Instant.now();
+
+            String duration = ChronoUnit.HOURS.between(start, end) + "hours "
+                    + ChronoUnit.MINUTES.between(start, end) % 60 + "min "
+                    + (ChronoUnit.SECONDS.between(start, end) % 60) + "secs";
+
+            LOG.info(counter + " documents added successfully in " + duration);
+
+            return true;
+        }catch (Exception e){
+            LOG.error("Unexpected error",e);
+            return false;
+        }
+
+    }
+
 }

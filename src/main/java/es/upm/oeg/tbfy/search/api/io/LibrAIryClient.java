@@ -18,6 +18,7 @@ import es.upm.oeg.librairy.api.facade.model.rest.Reference;
 import es.upm.oeg.librairy.api.facade.model.rest.TextReference;
 import es.upm.oeg.tbfy.search.api.model.Filter;
 import es.upm.oeg.tbfy.search.api.model.Item;
+import es.upm.oeg.tbfy.search.api.model.TopicsRequest;
 import es.upm.oeg.tbfy.search.api.service.LanguageService;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -37,9 +38,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -51,19 +50,19 @@ public class LibrAIryClient {
     private static final Logger LOG = LoggerFactory.getLogger(LibrAIryClient.class);
 
     @Value("#{environment['SOLR_ENDPOINT']?:'${solr.endpoint}'}")
-    String solrEndpoint;
+    public String solrEndpoint;
 
     @Value("#{environment['LIBRAIRY_API_USERNAME']?:'${librairy.api.username}'}")
-    String librairyUser;
+    public String librairyUser;
 
     @Value("#{environment['LIBRAIRY_API_PASSWORD']?:'${librairy.api.password}'}")
-    String librairyPassword;
+    public String librairyPassword;
 
     @Value("#{environment['LIBRAIRY_API_ENDPOINT']?:'${librairy.api.endpoint}'}")
-    String librairyEndpoint;
+    public String librairyEndpoint;
 
     @Value("#{environment['MODEL_ENDPOINT']?:'${librairy.model.endpoint}'}")
-    String modelEndpoint;
+    public String modelEndpoint;
 
     @Autowired
     LanguageService languageService;
@@ -182,8 +181,12 @@ public class LibrAIryClient {
             textReference.setContent(text);
 
             // detect language from text
-            String lang = languageService.getLanguage(text);
-            String model = modelEndpoint.replace("%%",lang);
+            Optional<String> lang = languageService.getLanguage(text);
+            if (!lang.isPresent()) {
+                LOG.warn("Language not supported");
+                return new ArrayList<>();
+            }
+            String model = modelEndpoint.replace("%%",lang.get());
             textReference.setModel(model);
 
             reference.setText(textReference);
@@ -240,5 +243,42 @@ public class LibrAIryClient {
 
         }
         return items;
+    }
+
+    public Map<String,String> getTopics(String txt, String lang){
+
+        Map<String,String> topics = new HashMap<>();
+        try{
+            String model = modelEndpoint.replace("%%",lang);
+            TopicsRequest request = new TopicsRequest(txt);
+            HttpResponse<JsonNode> result = Unirest.post(model + "/classes").body(request).asJson();
+
+            List<String> topics0 = new ArrayList<>();
+            List<String> topics1 = new ArrayList<>();
+            List<String> topics2 = new ArrayList<>();
+            if (result.getStatus() == 200){
+
+                JSONArray jsonTopics = result.getBody().getArray();
+                for(int i=0; i<jsonTopics.length(); i++){
+                    JSONObject jsonTopic = jsonTopics.getJSONObject(i);
+                    switch (jsonTopic.getInt("id")){
+                        case 0: topics0.add(jsonTopic.getString("name"));
+                        break;
+                        case 1: topics1.add(jsonTopic.getString("name"));
+                            break;
+                        case 2: topics2.add(jsonTopic.getString("name"));
+                            break;
+                    }
+                }
+
+                topics.put("0",topics0.stream().collect(Collectors.joining(" ")));
+                topics.put("1",topics1.stream().collect(Collectors.joining(" ")));
+                topics.put("2",topics2.stream().collect(Collectors.joining(" ")));
+            }
+
+        }catch (Exception e){
+            LOG.error("Unexpected error",e);
+        }
+        return topics;
     }
 }
