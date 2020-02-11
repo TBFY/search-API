@@ -111,22 +111,26 @@ public class KGAPIClient {
         this.executor = new ParallelExecutor();
     }
 
-    public List<String> getTenders(Integer size, Integer offset){
+    public List<Tender> getTenders(Integer size, Integer offset){
 
         try {
 
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("size",size);
             parameters.put("offset",offset);
-            HttpResponse<JsonNode> result = Unirest.get(kgAPIEndpoint + "/tenders").queryString(parameters).asJson();
+            HttpResponse<JsonNode> result = Unirest.get(kgAPIEndpoint + "/tender").queryString(parameters).asJson();
 
-            List<String> tenders = new ArrayList<>();
+            List<Tender> tenders = new ArrayList<>();
             if (result.getStatus() == 200){
 
                 JSONArray list = result.getBody().getArray();
                 for(int i=0;i<list.length();i++){
                     final JSONObject jsonItem = list.getJSONObject(i);
-                    tenders.add(jsonItem.getString("id"));
+                    Tender tender = new Tender();
+                    tender.setId(jsonItem.getString("id"));
+                    tender.setName(jsonItem.getString("title"));
+                    tender.setText(jsonItem.getString("description"));
+                    tenders.add(tender);
                 }
 
             }
@@ -142,7 +146,7 @@ public class KGAPIClient {
         Optional<Tender> rspTender = Optional.empty();
         try{
 
-            HttpResponse<JsonNode> result = Unirest.get(kgAPIEndpoint + "/tenders/"+id).asJson();
+            HttpResponse<JsonNode> result = Unirest.get(kgAPIEndpoint + "/tender/"+id).asJson();
 
 
             if (result.getStatus() != 200){
@@ -154,7 +158,7 @@ public class KGAPIClient {
 
             Tender tender = new Tender();
             tender.setId(id);
-            tender.setName(json.getString("tenderId"));
+            tender.setName(json.getString("id"));
             tender.setText(json.getString("description"));
 
             rspTender = Optional.of(tender);

@@ -156,35 +156,32 @@ public class DocumentsService {
             boolean completed = false;
             Instant start = Instant.now();
 
+            //TODO remove solr index
+
+
+
             ParallelExecutor executor = new ParallelExecutor();
 
             while(!completed){
                 // read tenders
-                List<String> tenders = kgapiClient.getTenders(size, offset++);
+                List<Tender> tenders = kgapiClient.getTenders(size, offset++);
 
                 completed = tenders.size() < size;
 
                 //TODO parallel
-                for(String tId : tenders){
+                for(Tender tender : tenders){
                     // save documents for each tender
-                    final String tenderId = tId;
+                    final Tender tenderValue = tender;
 
                     executor.submit(new Runnable() {
                         @Override
                         public void run() {
                             try{
-                                Optional<Tender> tender = kgapiClient.getTender(tenderId);
-                                if (!tender.isPresent()){
-                                    LOG.warn("No tender found by id: " + tId);
-                                    return;
-                                }
-
                                 InternalDocument tenderDocument = new InternalDocument();
 
-                                Tender tenderValue = tender.get();
                                 if (Strings.isNullOrEmpty(tenderValue.getText())) return;
 
-                                tenderDocument.setId(tId);
+                                tenderDocument.setId(tenderValue.getId());
                                 tenderDocument.setFormat("kg");
                                 tenderDocument.setName(tenderValue.getName());
                                 tenderDocument.setText(tenderValue.getText());
@@ -193,7 +190,7 @@ public class DocumentsService {
 
                                 add(tenderDocument, false);
                             }catch (Exception e){
-                                LOG.error("Unexpected error on tender: " + tenderId, e);
+                                LOG.error("Unexpected error on tender: " + tenderValue.getId(), e);
                             }
                         }
                     });

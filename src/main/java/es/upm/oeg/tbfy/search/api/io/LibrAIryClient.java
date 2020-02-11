@@ -205,7 +205,7 @@ public class LibrAIryClient {
             if (filter.hasSource()) filters.add("source_s:"+filter.getSource());
             if (filter.hasLang()) filters.add("lang_s:"+filter.getLang());
             if (filter.hasName()) filters.add("name_s:"+filter.getName());
-            if (filter.hasText()) filters.add("text_t:"+filter.getText());
+            if (filter.hasText()) filters.add("txt_t:"+filter.getText());
             dataSource.setFilter(filters.stream().collect(Collectors.joining(" AND ")));
 
             dataSource.setFormat(ReaderFormat.SOLR_CORE);
