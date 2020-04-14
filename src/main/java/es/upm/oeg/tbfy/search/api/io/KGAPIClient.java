@@ -12,6 +12,7 @@ import es.upm.oeg.librairy.api.facade.model.rest.*;
 import es.upm.oeg.tbfy.search.api.executors.ParallelExecutor;
 import es.upm.oeg.tbfy.search.api.model.Filter;
 import es.upm.oeg.tbfy.search.api.model.Item;
+import es.upm.oeg.tbfy.search.api.model.Organization;
 import es.upm.oeg.tbfy.search.api.model.Tender;
 import es.upm.oeg.tbfy.search.api.service.LanguageService;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -109,6 +110,37 @@ public class KGAPIClient {
     @PostConstruct
     public void setup(){
         this.executor = new ParallelExecutor();
+    }
+
+    public List<Organization> getOrganizations(Integer size, Integer offset){
+
+        try {
+
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("size",size);
+            parameters.put("offset",offset);
+            HttpResponse<JsonNode> result = Unirest.get(kgAPIEndpoint + "/organisation").queryString(parameters).asJson();
+
+            List<Organization> organizations = new ArrayList<>();
+            if (result.getStatus() == 200){
+
+                JSONArray list = result.getBody().getArray();
+                for(int i=0;i<list.length();i++){
+                    final JSONObject jsonItem = list.getJSONObject(i);
+                    Organization organization = new Organization();
+                    organization.setId(jsonItem.getString("id"));
+                    organization.setName(jsonItem.getString("legalName"));
+                    organization.setJurisdiction(jsonItem.getString("jurisdiction"));
+                    organizations.add(organization);
+                }
+
+            }
+            return organizations;
+        } catch (UnirestException e) {
+            LOG.warn("Unexpected error", e);
+            return Collections.emptyList();
+        }
+
     }
 
     public List<Tender> getTenders(Integer size, Integer offset){

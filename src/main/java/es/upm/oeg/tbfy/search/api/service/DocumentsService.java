@@ -148,6 +148,12 @@ public class DocumentsService {
     }
 
     public boolean addAll(){
+        //TODO remove solr index
+        return addTenders() && addOrganizations();
+    }
+
+
+    private boolean addTenders(){
 
         try{
             int counter = 0;
@@ -155,10 +161,6 @@ public class DocumentsService {
             int offset = 0;
             boolean completed = false;
             Instant start = Instant.now();
-
-            //TODO remove solr index
-
-
 
             ParallelExecutor executor = new ParallelExecutor();
 
@@ -172,6 +174,71 @@ public class DocumentsService {
                 for(Tender tender : tenders){
                     // save documents for each tender
                     final Tender tenderValue = tender;
+
+                    executor.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            try{
+                                InternalDocument tenderDocument = new InternalDocument();
+
+                                if (Strings.isNullOrEmpty(tenderValue.getText())) return;
+
+                                tenderDocument.setId(tenderValue.getId());
+                                tenderDocument.setFormat("kg");
+                                tenderDocument.setName(tenderValue.getName());
+                                tenderDocument.setText(tenderValue.getText());
+                                tenderDocument.setDate(DateService.now());
+                                tenderDocument.setSource("tender");
+
+                                add(tenderDocument, false);
+                            }catch (Exception e){
+                                LOG.error("Unexpected error on tender: " + tenderValue.getId(), e);
+                            }
+                        }
+                    });
+                }
+                counter += tenders.size();
+            }
+
+            executor.awaitTermination(5, TimeUnit.MINUTES);
+
+            Instant end = Instant.now();
+
+            String duration = ChronoUnit.HOURS.between(start, end) + "hours "
+                    + ChronoUnit.MINUTES.between(start, end) % 60 + "min "
+                    + (ChronoUnit.SECONDS.between(start, end) % 60) + "secs";
+
+            LOG.info(counter + " documents added successfully in " + duration);
+
+            return true;
+        }catch (Exception e){
+            LOG.error("Unexpected error",e);
+            return false;
+        }
+
+    }
+
+    private boolean addOrganizations(){
+
+        try{
+            int counter = 0;
+            int size = 50;
+            int offset = 0;
+            boolean completed = false;
+            Instant start = Instant.now();
+
+            ParallelExecutor executor = new ParallelExecutor();
+
+            while(!completed){
+                // read organizations
+                List<Organization> organizations = kgapiClient.getOrganizations(size, offset++);
+
+                completed = organizations.size() < size;
+
+                //TODO parallel
+                for(Organization organization : organizations){
+                    // save documents for each tender
+                    final Organization organizationValue = organization;
 
                     executor.submit(new Runnable() {
                         @Override

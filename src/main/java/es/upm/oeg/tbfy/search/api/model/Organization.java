@@ -15,6 +15,8 @@ public class Organization {
 
     private String name;
 
+    private String jurisdiction;
+
 
     public Organization() {
     }
@@ -33,5 +35,13 @@ public class Organization {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getJurisdiction() {
+        return jurisdiction;
+    }
+
+    public void setJurisdiction(String jurisdiction) {
+        this.jurisdiction = jurisdiction;
     }
 }
