@@ -20,14 +20,17 @@ public class DocumentSummary {
 
     private String source;
 
+    private String date;
+
     public DocumentSummary() {
     }
 
-    public DocumentSummary(String id, String name, String language, String source) {
+    public DocumentSummary(String id, String name, String language, String source, String date) {
         this.id = id;
         this.name = name;
         this.language = language;
         this.source = source;
+        this.date = date;
     }
 
     public String getId() {
@@ -62,6 +65,14 @@ public class DocumentSummary {
         this.source = source;
     }
 
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -72,6 +83,7 @@ public class DocumentSummary {
         if (!id.equals(that.id)) return false;
         if (language != null ? !language.equals(that.language) : that.language != null) return false;
         if (!name.equals(that.name)) return false;
+        if (date != null ? !date.equals(that.date) : that.date != null) return false;
         return source != null ? source.equals(that.source) : that.source == null;
 
     }
@@ -82,6 +94,7 @@ public class DocumentSummary {
         result = 31 * result + (language != null ? language.hashCode() : 0);
         result = 31 * result + name.hashCode();
         result = 31 * result + (source != null ? source.hashCode() : 0);
+        result = 31 * result + (date != null ? date.hashCode() : 0);
         return result;
     }
 }

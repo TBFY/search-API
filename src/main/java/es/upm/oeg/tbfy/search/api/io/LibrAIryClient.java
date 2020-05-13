@@ -140,6 +140,7 @@ public class LibrAIryClient {
             DataFields dataFields = new DataFields();
             dataFields.setId("id");
             dataFields.setName("name_s");
+            dataFields.setExtra(Arrays.asList("source_s","date_dt"));
             dataSource.setDataFields(dataFields);
 
             Credentials credentials = new Credentials();
@@ -150,6 +151,7 @@ public class LibrAIryClient {
             if (filter.hasLang()) filters.add("lang_s:"+filter.getLang());
             if (filter.hasName()) filters.add("name_s:*"+filter.getName()+"*");
             if (filter.hasText()) filters.add("txt_t:"+filter.getText());
+            if (filter.hasDate()) filters.add("date_dt:["+filter.getDate()+"]");
             dataSource.setFilter(filters.stream().collect(Collectors.joining(" AND ")));
 
             dataSource.setFormat(ReaderFormat.SOLR_CORE);
@@ -196,6 +198,7 @@ public class LibrAIryClient {
             DataFields dataFields = new DataFields();
             dataFields.setId("id");
             dataFields.setName("name_s");
+            dataFields.setExtra(Arrays.asList("source_s","date_dt"));
             dataSource.setDataFields(dataFields);
 
             Credentials credentials = new Credentials();
@@ -206,6 +209,7 @@ public class LibrAIryClient {
             if (filter.hasLang()) filters.add("lang_s:"+filter.getLang());
             if (filter.hasName()) filters.add("name_s:"+filter.getName());
             if (filter.hasText()) filters.add("txt_t:"+filter.getText());
+            if (filter.hasDate()) filters.add("date_dt:["+filter.getDate()+"]");
             dataSource.setFilter(filters.stream().collect(Collectors.joining(" AND ")));
 
             dataSource.setFormat(ReaderFormat.SOLR_CORE);

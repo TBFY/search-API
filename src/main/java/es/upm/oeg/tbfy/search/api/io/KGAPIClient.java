@@ -160,8 +160,19 @@ public class KGAPIClient {
                     final JSONObject jsonItem = list.getJSONObject(i);
                     Tender tender = new Tender();
                     tender.setId(jsonItem.getString("id"));
-                    tender.setName(jsonItem.getString("title"));
-                    tender.setText(jsonItem.getString("description"));
+                    if (jsonItem.has("title")){
+                        tender.setName(jsonItem.getString("title"));
+                    }
+                    if (jsonItem.has("description")){
+                        tender.setText(jsonItem.getString("description"));
+                    }
+                    if (jsonItem.has("status")){
+                        tender.setStatus(jsonItem.getString("status"));
+                    }
+                    if (jsonItem.has("_creationDate")){
+                        tender.setCreationDate(jsonItem.getString("_creationDate"));
+                    }
+
                     tenders.add(tender);
                 }
 

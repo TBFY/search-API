@@ -1,5 +1,6 @@
 package es.upm.oeg.tbfy.search.api.model;
 
+import es.upm.oeg.tbfy.search.api.service.DateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +18,16 @@ public class Tender {
 
     private String text;
 
+    private String status;
+
+    private String creationDate;
+
     public Tender() {
+        this.id = "";
+        this.name = "";
+        this.text = "";
+        this.status = "";
+        this.creationDate = DateService.now();
     }
 
     public String getId() {
@@ -42,5 +52,21 @@ public class Tender {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(String creationDate) {
+        this.creationDate = creationDate;
     }
 }

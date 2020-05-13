@@ -20,14 +20,17 @@ public class Item {
 
     private Double score;
 
+    private String date;
+
     public Item() {
     }
 
-    public Item(String id, String name, String lang, Double score) {
+    public Item(String id, String name, String lang, Double score, String date) {
         this.id = id;
         this.name = name;
         this.lang = lang;
         this.score = score;
+        this.date = date;
     }
 
     public String getId() {
@@ -60,6 +63,14 @@ public class Item {
 
     public void setScore(Double score) {
         this.score = score;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 
     @Override

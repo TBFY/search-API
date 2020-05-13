@@ -81,7 +81,7 @@ public class DocumentsService {
     }
 
     public DocumentSummaryList getDocuments(Filter filter){
-        List<String> fields = Arrays.asList("name_s","lang_s","source_s");
+        List<String> fields = Arrays.asList("name_s","lang_s","source_s","date_dt");
 
         Map<String, Object> queryParams = new HashMap<>();
         if (filter.hasId()) queryParams.put("id",filter.getId());
@@ -89,6 +89,7 @@ public class DocumentsService {
         if (filter.hasLang()) queryParams.put("lang_s",filter.getLang());
         if (filter.hasText()) queryParams.put("txt_t",filter.getText());
         if (filter.hasSource()) queryParams.put("source_s","*"+filter.getSource()+"*");
+        if (filter.hasDate()) queryParams.put("date_dt","["+filter.getDate()+"]");
 
 
         Optional<String> cursor = filter.hasCursor()? Optional.of(filter.getCursor()) : Optional.empty();
@@ -111,6 +112,7 @@ public class DocumentsService {
             if (qdd.containsKey("name_s"))  document.setName(String.valueOf(qdd.get("name_s")));
             if (qdd.containsKey("id"))  document.setId(String.valueOf(qdd.get("id")));
             if (qdd.containsKey("source_s"))  document.setSource(String.valueOf(qdd.get("source_s")));
+            if (qdd.containsKey("date_dt"))  document.setDate(String.valueOf(qdd.get("date_dt")));
 
             documents.add(document);
         }
@@ -122,6 +124,11 @@ public class DocumentsService {
     public boolean add(InternalDocument document, Boolean commit){
 
         try{
+
+            if (solrSearcher.exists(document.getId())){
+                LOG.info("Document '" + document.getId()+"' already exists");
+                return true;
+            }
 
             Optional<String> lang = languageService.getLanguage(document.getText());
             if (!lang.isPresent()) {
@@ -148,12 +155,6 @@ public class DocumentsService {
     }
 
     public boolean addAll(){
-        //TODO remove solr index
-        return addTenders() && addOrganizations();
-    }
-
-
-    private boolean addTenders(){
 
         try{
             int counter = 0;
@@ -170,7 +171,6 @@ public class DocumentsService {
 
                 completed = tenders.size() < size;
 
-                //TODO parallel
                 for(Tender tender : tenders){
                     // save documents for each tender
                     final Tender tenderValue = tender;
@@ -187,72 +187,8 @@ public class DocumentsService {
                                 tenderDocument.setFormat("kg");
                                 tenderDocument.setName(tenderValue.getName());
                                 tenderDocument.setText(tenderValue.getText());
-                                tenderDocument.setDate(DateService.now());
-                                tenderDocument.setSource("tender");
-
-                                add(tenderDocument, false);
-                            }catch (Exception e){
-                                LOG.error("Unexpected error on tender: " + tenderValue.getId(), e);
-                            }
-                        }
-                    });
-                }
-                counter += tenders.size();
-            }
-
-            executor.awaitTermination(5, TimeUnit.MINUTES);
-
-            Instant end = Instant.now();
-
-            String duration = ChronoUnit.HOURS.between(start, end) + "hours "
-                    + ChronoUnit.MINUTES.between(start, end) % 60 + "min "
-                    + (ChronoUnit.SECONDS.between(start, end) % 60) + "secs";
-
-            LOG.info(counter + " documents added successfully in " + duration);
-
-            return true;
-        }catch (Exception e){
-            LOG.error("Unexpected error",e);
-            return false;
-        }
-
-    }
-
-    private boolean addOrganizations(){
-
-        try{
-            int counter = 0;
-            int size = 50;
-            int offset = 0;
-            boolean completed = false;
-            Instant start = Instant.now();
-
-            ParallelExecutor executor = new ParallelExecutor();
-
-            while(!completed){
-                // read organizations
-                List<Organization> organizations = kgapiClient.getOrganizations(size, offset++);
-
-                completed = organizations.size() < size;
-
-                //TODO parallel
-                for(Organization organization : organizations){
-                    // save documents for each tender
-                    final Organization organizationValue = organization;
-
-                    executor.submit(new Runnable() {
-                        @Override
-                        public void run() {
-                            try{
-                                InternalDocument tenderDocument = new InternalDocument();
-
-                                if (Strings.isNullOrEmpty(tenderValue.getText())) return;
-
-                                tenderDocument.setId(tenderValue.getId());
-                                tenderDocument.setFormat("kg");
-                                tenderDocument.setName(tenderValue.getName());
-                                tenderDocument.setText(tenderValue.getText());
-                                tenderDocument.setDate(DateService.now());
+                                tenderDocument.setDate(tenderValue.getCreationDate());
+                                tenderDocument.setTags(tenderValue.getStatus());
                                 tenderDocument.setSource("tender");
 
                                 add(tenderDocument, false);

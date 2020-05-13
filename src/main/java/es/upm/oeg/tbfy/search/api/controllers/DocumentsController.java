@@ -63,6 +63,7 @@ public class DocumentsController {
             @RequestParam(defaultValue = "") String text,
             @RequestParam(defaultValue = "") String source,
             @RequestParam(defaultValue = "") String cursor,
+            @RequestParam(defaultValue = "") String date,
             @RequestParam(defaultValue = "10") Integer size
     )  {
         try {
@@ -74,6 +75,7 @@ public class DocumentsController {
             filter.setSource(source);
             filter.setCursor(cursor);
             filter.setSize(size);
+            filter.setDate(date);
 
             DocumentSummaryList documents = documentsService.getDocuments(filter);
 
@@ -133,6 +135,7 @@ public class DocumentsController {
             @RequestParam(defaultValue = "") String lang,
             @RequestParam(defaultValue = "") String terms,
             @RequestParam(defaultValue = "") String source,
+            @RequestParam(defaultValue = "") String date,
             @RequestParam(defaultValue = "10") Integer size
     )  {
         try {
@@ -143,6 +146,7 @@ public class DocumentsController {
             filter.setText(terms);
             filter.setSource(source);
             filter.setSize(size);
+            filter.setDate(date);
 
             List<Item> items = itemsService.getItemsById(id, filter);
 

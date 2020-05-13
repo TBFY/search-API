@@ -26,6 +26,8 @@ public class Filter {
 
     private String source;
 
+    private String date;
+
     public Filter() {
     }
 
@@ -111,5 +113,17 @@ public class Filter {
 
     public void setSource(String source) {
         this.source = source;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public Boolean hasDate(){
+        return !Strings.isNullOrEmpty(date);
     }
 }

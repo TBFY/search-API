@@ -154,6 +154,36 @@ public class SolrSearcher {
     }
 
 
+    public Boolean exists(String id) {
+
+        SolrQuery refQuery = new SolrQuery();
+        try {
+            refQuery.setRows(0);
+
+            String query = "id:"+id;
+
+            refQuery.setQuery(query);
+
+            QueryResponse rsp = solrClient.query(refQuery);
+
+            long total = rsp.getResults().getNumFound();
+
+            return total > 0;
+
+        } catch (SolrServerException e) {
+            LOG.error("Error reading solr core",e);
+            return false;
+        } catch (IOException e) {
+            LOG.error("Error connecting to solr server",e);
+            return false;
+        } catch (Exception e){
+            LOG.error("Unexpected query error",e);
+            return false;
+        }
+
+
+    }
+
     public boolean save(InternalDocument doc){
 
         try {
