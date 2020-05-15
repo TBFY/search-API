@@ -176,6 +176,8 @@ public class KGAPIClient {
                     tenders.add(tender);
                 }
 
+            }else{
+                LOG.warn("KG-API response status is: " + result.getStatus() + " for size: " + size + " and offset: " + offset);
             }
             return tenders;
         } catch (UnirestException e) {

@@ -17,6 +17,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -127,7 +128,7 @@ public class DocumentsService {
 
             if (solrSearcher.exists(document.getId())){
                 LOG.info("Document '" + document.getId()+"' already exists");
-                return true;
+                return false;
             }
 
             Optional<String> lang = languageService.getLanguage(document.getText());
@@ -157,48 +158,63 @@ public class DocumentsService {
     public boolean addAll(){
 
         try{
-            int counter = 0;
-            int size = 50;
-            int offset = 0;
-            boolean completed = false;
+            final AtomicInteger total = new AtomicInteger(0);
+            final AtomicInteger counter = new AtomicInteger(0);
+            final AtomicInteger size = new AtomicInteger(150);
+            final AtomicInteger offset = new AtomicInteger(0);
+            final AtomicInteger emptyResponses = new AtomicInteger(0);
             Instant start = Instant.now();
 
             ParallelExecutor executor = new ParallelExecutor();
 
-            while(!completed){
-                // read tenders
-                List<Tender> tenders = kgapiClient.getTenders(size, offset++);
+            while(emptyResponses.get() <= 0){
 
-                completed = tenders.size() < size;
-
-                for(Tender tender : tenders){
-                    // save documents for each tender
-                    final Tender tenderValue = tender;
 
                     executor.submit(new Runnable() {
                         @Override
                         public void run() {
-                            try{
-                                InternalDocument tenderDocument = new InternalDocument();
+                            // read tenders
+                            int sizeValue = size.get();
+                            int offsetValue = offset.getAndIncrement();
+                            try {
+                                List<Tender> tenders = kgapiClient.getTenders(sizeValue, offsetValue);
 
-                                if (Strings.isNullOrEmpty(tenderValue.getText())) return;
+                                if (tenders.isEmpty()){
+                                    emptyResponses.incrementAndGet();
+                                    LOG.warn("Empty list of tenders by size: " + sizeValue  + ", and offset:" + offsetValue);
+                                }
 
-                                tenderDocument.setId(tenderValue.getId());
-                                tenderDocument.setFormat("kg");
-                                tenderDocument.setName(tenderValue.getName());
-                                tenderDocument.setText(tenderValue.getText());
-                                tenderDocument.setDate(tenderValue.getCreationDate());
-                                tenderDocument.setTags(tenderValue.getStatus());
-                                tenderDocument.setSource("tender");
+                                for(Tender tender : tenders){
+                                    total.incrementAndGet();
+                                    // save documents for each tender
+                                    Tender tenderValue = tender;
+                                    try{
+                                        InternalDocument tenderDocument = new InternalDocument();
 
-                                add(tenderDocument, false);
+                                        if (Strings.isNullOrEmpty(tenderValue.getText())) return;
+
+                                        tenderDocument.setId(tenderValue.getId());
+                                        tenderDocument.setFormat("kg");
+                                        tenderDocument.setName(tenderValue.getName());
+                                        tenderDocument.setText(tenderValue.getText());
+                                        tenderDocument.setDate(tenderValue.getCreationDate());
+                                        tenderDocument.setTags(tenderValue.getStatus());
+                                        tenderDocument.setSource("tender");
+
+                                        if (add(tenderDocument, false)) {
+                                            counter.incrementAndGet();
+                                        }
+                                    }catch (Exception e){
+                                        LOG.error("Unexpected error on tender: " + tenderValue.getId(), e);
+                                    }
+
+                                }
                             }catch (Exception e){
-                                LOG.error("Unexpected error on tender: " + tenderValue.getId(), e);
+                                LOG.error("Unexpected error reading tenders from kg-api with size=" + sizeValue + " and offset=" + offsetValue, e);
                             }
                         }
                     });
-                }
-                counter += tenders.size();
+
             }
 
             executor.awaitTermination(5, TimeUnit.MINUTES);
@@ -209,7 +225,7 @@ public class DocumentsService {
                     + ChronoUnit.MINUTES.between(start, end) % 60 + "min "
                     + (ChronoUnit.SECONDS.between(start, end) % 60) + "secs";
 
-            LOG.info(counter + " documents added successfully in " + duration);
+            LOG.info(total + " documents analyzed and " + counter.get() + " added successfully in " + duration);
 
             return true;
         }catch (Exception e){
