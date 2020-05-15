@@ -11,6 +11,8 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -55,7 +57,14 @@ public class SolrSearcher {
     @PostConstruct
     public void setup(){
 
-        HttpClientBuilder client = HttpClientBuilder.create();
+        PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
+
+        //Set the maximum number of connections in the pool
+        connManager.setMaxTotal(100);
+
+        HttpClientBuilder client = HttpClients.custom().setConnectionManager(connManager);
+
+        //HttpClientBuilder client = HttpClientBuilder.create();
 
         if (!Strings.isNullOrEmpty(username) && !Strings.isNullOrEmpty(password)){
             CredentialsProvider provider = new BasicCredentialsProvider();

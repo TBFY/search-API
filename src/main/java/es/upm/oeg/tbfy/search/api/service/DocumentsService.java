@@ -191,7 +191,7 @@ public class DocumentsService {
                                     try{
                                         InternalDocument tenderDocument = new InternalDocument();
 
-                                        if (Strings.isNullOrEmpty(tenderValue.getText())) return;
+                                        if (Strings.isNullOrEmpty(tenderValue.getText()) || tenderValue.getText().length() < 25) return;
 
                                         tenderDocument.setId(tenderValue.getId());
                                         tenderDocument.setFormat("kg");
@@ -203,6 +203,11 @@ public class DocumentsService {
 
                                         if (add(tenderDocument, false)) {
                                             counter.incrementAndGet();
+                                        }
+
+                                        if ((counter.get() % 100 == 0) && (counter.get() > 0)){
+                                            LOG.info("index committed");
+                                            solrSearcher.commit();
                                         }
                                     }catch (Exception e){
                                         LOG.error("Unexpected error on tender: " + tenderValue.getId(), e);
@@ -218,6 +223,8 @@ public class DocumentsService {
             }
 
             executor.awaitTermination(5, TimeUnit.MINUTES);
+
+            solrSearcher.commit();
 
             Instant end = Instant.now();
 

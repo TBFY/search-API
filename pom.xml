@@ -11,7 +11,7 @@ http://www.w3.org/2001/XMLSchema-instance ">
 
 	<groupId>es.upm.oeg.tbfy</groupId>
 	<artifactId>search-api</artifactId>
-	<version>1.15</version>
+	<version>1.2.1</version>
 	<packaging>jar</packaging>
 	<name>search-api</name>
 
@@ -52,7 +52,7 @@ http://www.w3.org/2001/XMLSchema-instance ">
 		<solr.version>7.4.0</solr.version>
 		<testutils.version>1.0.0</testutils.version>
 		<tika.version>1.18</tika.version>
-		<unirest.version>1.4.9</unirest.version>
+		<unirest.version>1.4.9</unirest.version><!-- 1.4.9 -->
 		<velocity.version>1.7</velocity.version>
 		<velocity.tool.version>2.0</velocity.tool.version>
 	</properties>

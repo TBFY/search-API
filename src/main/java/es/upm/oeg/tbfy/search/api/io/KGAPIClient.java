@@ -15,9 +15,13 @@ import es.upm.oeg.tbfy.search.api.model.Item;
 import es.upm.oeg.tbfy.search.api.model.Organization;
 import es.upm.oeg.tbfy.search.api.model.Tender;
 import es.upm.oeg.tbfy.search.api.service.LanguageService;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -50,7 +54,13 @@ public class KGAPIClient {
     public String kgAPIEndpoint;
 
 
+    private static final int availableProcessors = Runtime.getRuntime().availableProcessors();
+
     static{
+
+        Unirest.setConcurrency(availableProcessors*4, availableProcessors);
+
+        Unirest.setDefaultHeader("X-app-name", "tbfy-search-API");
         Unirest.setDefaultHeader("Accept", MediaType.APPLICATION_JSON_VALUE);
         Unirest.setDefaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
 
@@ -97,7 +107,23 @@ public class KGAPIClient {
             sslcontext.init(null, trustAllCerts, new java.security.SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sslcontext.getSocketFactory());
             SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext);
-            CloseableHttpClient httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+
+            RequestConfig.Builder requestBuilder = RequestConfig.custom();
+            requestBuilder.setConnectTimeout(20000);
+            requestBuilder.setConnectionRequestTimeout(300000);
+            requestBuilder.setSocketTimeout(300000);
+
+            PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
+            //Set the maximum number of connections in the pool
+            connManager.setMaxTotal(100);
+
+            HttpClientBuilder builder = HttpClientBuilder.create();
+            builder.setConnectionManager(connManager);
+            builder.setDefaultRequestConfig(requestBuilder.build());
+            builder.setSSLSocketFactory(sslsf);
+
+            CloseableHttpClient httpclient = builder.build();
+
             Unirest.setHttpClient(httpclient);
 
         } catch (Exception e) {
