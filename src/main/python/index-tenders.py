@@ -55,7 +55,7 @@ async def index_documents(directory):
         
     print("{0:<30} {1:>20}".format("Files from " + directory, "Status"))
     
-    with ThreadPoolExecutor(max_workers=2) as executor:
+    with ThreadPoolExecutor(max_workers=8) as executor:
         with requests.Session() as session:
                         
             # Set any session parameters here before calling `fetch`
