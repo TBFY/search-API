@@ -8,6 +8,7 @@ import os
 import time
 import glob
 import sys
+import linecache
 
 START_TIME = default_timer()
 
@@ -33,7 +34,7 @@ def fetch(session,file_url):
                 if ('tender' in release):
                     tender_data = release['tender']
                     document = {}
-                    if ('description' in tender_data):
+                    if ('description' in tender_data and 'id' in tender_data):
                         id=tender_data['id']
                         base_url = 'http://tbfy.librairy.linkeddata.es/search-api/documents/'
                         document['name']=tender_data['title']
@@ -43,8 +44,6 @@ def fetch(session,file_url):
                         document['source']="tender"
                         document['date']=data['publishedDate']
                         with session.post(base_url + id, json=document) as response:
-                            elapsed = default_timer() - START_TIME
-                            time_completed_at = "{:5.2f}s".format(elapsed)
                             print("{0:<30} {1:>20}".format(file_url, response.status_code))
                             
     except Exception as e:
@@ -54,13 +53,13 @@ def fetch(session,file_url):
 async def index_documents(directory):
         
     print("{0:<30} {1:>20}".format("Files from " + directory, "Status"))
+    START_TIME = default_timer()
     
     with ThreadPoolExecutor(max_workers=8) as executor:
         with requests.Session() as session:
                         
             # Set any session parameters here before calling `fetch`
             loop = asyncio.get_event_loop()
-            START_TIME = default_timer()
             tasks = [
                 loop.run_in_executor(
                     executor,
@@ -71,7 +70,9 @@ async def index_documents(directory):
             ]
             for response in await asyncio.gather(*tasks):
                 pass
-
+    elapsed = default_timer() - START_TIME
+    time_completed_at = "{:5.2f}s".format(elapsed)
+    print("Directory {0:<30} added at {1:>20}".format(directory, time_completed_at))
 
 def main(path):
     # Articles
