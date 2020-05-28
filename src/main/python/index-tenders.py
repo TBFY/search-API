@@ -40,7 +40,7 @@ def fetch(session,file_url):
                         if ('status' in tender_data):
                             document['tags']=tender_data['status']
                         document['text']=tender_data['description']
-                        document['source']=data['publisher']['name']
+                        document['source']="tender"
                         document['date']=data['publishedDate']
                         with session.post(base_url + id, json=document) as response:
                             elapsed = default_timer() - START_TIME
