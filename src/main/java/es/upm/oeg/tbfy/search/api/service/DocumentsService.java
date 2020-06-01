@@ -160,7 +160,7 @@ public class DocumentsService {
         try{
             final AtomicInteger total = new AtomicInteger(0);
             final AtomicInteger counter = new AtomicInteger(0);
-            final AtomicInteger size = new AtomicInteger(150);
+            final AtomicInteger size = new AtomicInteger(50);
             final AtomicInteger offset = new AtomicInteger(0);
             final AtomicInteger emptyResponses = new AtomicInteger(0);
             Instant start = Instant.now();
@@ -182,6 +182,7 @@ public class DocumentsService {
                                 if (tenders.isEmpty()){
                                     emptyResponses.incrementAndGet();
                                     LOG.warn("Empty list of tenders by size: " + sizeValue  + ", and offset:" + offsetValue);
+                                    return;
                                 }
 
                                 for(Tender tender : tenders){

@@ -38,6 +38,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
@@ -110,8 +112,8 @@ public class KGAPIClient {
 
             RequestConfig.Builder requestBuilder = RequestConfig.custom();
             requestBuilder.setConnectTimeout(20000);
-            requestBuilder.setConnectionRequestTimeout(300000);
-            requestBuilder.setSocketTimeout(300000);
+            requestBuilder.setConnectionRequestTimeout(600000);
+            requestBuilder.setSocketTimeout(600000);
 
             PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
             //Set the maximum number of connections in the pool
@@ -171,6 +173,7 @@ public class KGAPIClient {
 
     public List<Tender> getTenders(Integer size, Integer offset){
 
+        Instant start = Instant.now();
         try {
 
             Map<String, Object> parameters = new HashMap<>();
@@ -207,7 +210,14 @@ public class KGAPIClient {
             }
             return tenders;
         } catch (UnirestException e) {
-            LOG.warn("Unexpected error", e);
+
+            Instant end = Instant.now();
+
+            String duration = ChronoUnit.HOURS.between(start, end) + "hours "
+                    + ChronoUnit.MINUTES.between(start, end) % 60 + "min "
+                    + (ChronoUnit.SECONDS.between(start, end) % 60) + "secs";
+
+            LOG.warn(e.getMessage() + " error after: " + duration + " with size: " + size + " and offset: " + offset);
             return Collections.emptyList();
         }
 

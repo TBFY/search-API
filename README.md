@@ -55,9 +55,9 @@ In order to obtain only documents in Spanish, just add `lang=es` to the json:
 
 ## Index Documents
 
-1. Download the latest data dump, in JSON format, published by TBFY at Zenodo:     
+1. Download the latest data dump available at Zenodo:     
     [https://doi.org/10.5281/zenodo.3783736](https://doi.org/10.5281/zenodo.3783736)
-1. Unzip it, for example in `/tmp`. A new folder is created for each month.         
+1. Unzip it, for example in `/tmp`. A folder is created per month.         
 1. Download the indexing script. It is implemented in Python, but is easily exportable to other languages:    
     [http://tbfy.librairy.linkeddata.es/search-api/src/main/python/index-tenders.py](https://github.com/TBFY/search-API/blob/master/src/main/python/index-tenders.py)
 1. Edit it to set the root directory where the documents are. For example `/tmp`:
