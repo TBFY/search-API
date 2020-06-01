@@ -7,8 +7,7 @@ from timeit import default_timer
 import os
 import time
 import glob
-import sys
-import linecache
+import sys, getopt, linecache, multiprocessing
 
 START_TIME = default_timer()
 
@@ -31,31 +30,35 @@ def fetch(session,file_url):
           data = json.load(f)
           if ('releases' in data):
               for release in data['releases']:
-                if ('tender' in release):
+                if ('tender' in release and 'ocid' in release):
+                    ocid = release['ocid']
                     tender_data = release['tender']
                     document = {}
                     if ('description' in tender_data and 'id' in tender_data):
-                        id=tender_data['id']
+                        tender_id=tender_data['id']
+                        id = ocid + "_" + tender_id
                         base_url = 'http://tbfy.librairy.linkeddata.es/search-api/documents/'
                         document['name']=tender_data['title']
                         if ('status' in tender_data):
                             document['tags']=tender_data['status']
-                        document['text']=tender_data['description']
-                        document['source']="tender"
-                        document['date']=data['publishedDate']
-                        with session.post(base_url + id, json=document) as response:
-                            print("{0:<30} {1:>20}".format(file_url, response.status_code))
+                        text = tender_data['description']
+                        if (len(text)>100):
+                            document['text']=text
+                            document['source']="tender"
+                            document['date']=data['publishedDate']
+                            with session.post(base_url + id, json=document) as response:
+                                print("{0:<30} {1:>20}".format(file_url, response.status_code))
                             
     except Exception as e:
         PrintException()
     
 
-async def index_documents(directory):
+async def index_documents(directory,workers):
         
-    print("{0:<30} {1:>20}".format("Files from " + directory, "Status"))
+    print("From {0:<30} {1:>20}".format(directory, "Status"))
     START_TIME = default_timer()
     
-    with ThreadPoolExecutor(max_workers=8) as executor:
+    with ThreadPoolExecutor(max_workers=workers) as executor:
         with requests.Session() as session:
                         
             # Set any session parameters here before calling `fetch`
@@ -74,17 +77,45 @@ async def index_documents(directory):
     time_completed_at = "{:5.2f}s".format(elapsed)
     print("Directory {0:<30} added at {1:>20}".format(directory, time_completed_at))
 
-def main(path):
+def main(argv):
+    directories = []
+    try:
+      opts, args = getopt.getopt(argv,"hi",["idir="])
+    except getopt.GetoptError:
+      print('Usage: index-tenders.py -i <inputdirectory>')
+      sys.exit(2)
+    if (len(opts) == 0):
+        print('Usage: index-tenders.py -i <inputdirectory>')
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+         print('Usage: index-tenders.py -i <inputdirectory>')
+         sys.exit()
+        elif opt in ("-i", "--idir"):
+         directories = args
+      
     # Articles
-    directories = glob.glob(path)            
+    #directories = glob.glob(inputdir)
+    
+    #Parallel
+    cpus = multiprocessing.cpu_count()
+    workers = 1
+    if (cpus > 1):
+        workers = cpus -1
+    
+    print("Max parallel workers:",workers)
 
     for directory in directories:
         if (os.path.isfile(directory)):
             continue
         
         loop = asyncio.get_event_loop()
-        future = asyncio.ensure_future(index_documents(directory))
+        future = asyncio.ensure_future(index_documents(directory,workers))
         loop.run_until_complete(future)
 
-                
-main('/Users/cbadenes/Downloads/20*')
+
+        
+        
+        
+if __name__ == "__main__":
+   main(sys.argv[1:])        
