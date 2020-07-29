@@ -52,6 +52,9 @@ public class LibrAIryClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(LibrAIryClient.class);
 
+    @Value("#{environment['KEYWORD_ENDPOINT']?:'${keyword.endpoint}'}")
+    public String keywordEndpoint;
+
     @Value("#{environment['SOLR_ENDPOINT']?:'${solr.endpoint}'}")
     public String solrEndpoint;
 
@@ -146,6 +149,27 @@ public class LibrAIryClient {
         }
     }
 
+    public List<String> getKeywords(String text){
+
+        JSONObject request = new JSONObject();
+        request.put("text", text);
+
+        List<String> keywords = new ArrayList<>();
+
+        try {
+            HttpResponse<JsonNode> result = Unirest.post(keywordEndpoint).body(request.toString()).asJson();
+            JSONArray keywordList = result.getBody().getArray();
+            for(int i=0; i< keywordList.length();i++){
+                keywords.add(keywordList.getString(i));
+            }
+
+        } catch (Exception e) {
+            LOG.warn("Error discovering keywords", e);
+        }
+
+        return keywords;
+
+    }
 
     public List<Item> getItemsById(String id, Filter filter){
 

@@ -90,8 +90,8 @@ public class SolrSearcher {
                 refQuery.setSort("id", SolrQuery.ORDER.asc);
                 refQuery.set(CursorMarkParams.CURSOR_MARK_PARAM, cursor.get());
             }else{
-                refQuery.setSort("id", SolrQuery.ORDER.asc);
-                refQuery.set(CursorMarkParams.CURSOR_MARK_PARAM, CursorMarkParams.CURSOR_MARK_START);
+                refQuery.setSort("score", SolrQuery.ORDER.desc);
+                //refQuery.set(CursorMarkParams.CURSOR_MARK_PARAM, CursorMarkParams.CURSOR_MARK_START);
             }
             refQuery.addField("name");
             if (fields.isPresent()){
@@ -103,7 +103,11 @@ public class SolrSearcher {
             //queryParams.put("txt_t","[* TO *]");
 
             if (!queryParams.isEmpty()){
-                query = queryParams.entrySet().stream().map(e -> e.getKey()+":"+e.getValue()).collect(Collectors.joining(" AND "));
+                if (queryParams.containsKey("raw_query")){
+                    query = (String) queryParams.get("raw_query");
+                }else{
+                    query = queryParams.entrySet().stream().map(e -> e.getKey()+":"+e.getValue()).collect(Collectors.joining(" AND "));
+                }
             }
 
             refQuery.setQuery(query);
