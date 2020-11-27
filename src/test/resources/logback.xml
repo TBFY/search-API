@@ -23,9 +23,8 @@
         </encoder>
     </appender>
 
-    <logger name="org.librairy" level="INFO"/>
-    <logger name="textrank" level="INFO"/>
-    <logger name="es.upm.oeg" level="INFO"/>
+    <logger name="org.librairy" level="DEBUG"/>
+    <logger name="es.upm.oeg" level="DEBUG"/>
     <logger name="cc.mallet.topics" level="INFO"/>
     <logger name="cc.mallet.topics.ParallelTopicModel" level="INFO"/>
 

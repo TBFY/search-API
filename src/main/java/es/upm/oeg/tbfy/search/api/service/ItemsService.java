@@ -42,10 +42,12 @@ public class ItemsService {
         String query_text = text;
 
         // If text is short, we need to improve it by adding extra content
+        //int remaining_words = -text.split(" ").length;
         int remaining_words = text.split(" ").length - 200;
+        LOG.debug("Remaining Words: "+remaining_words);
         if (remaining_words < 0 ){
             List<String> keywords = librAIryClient.getKeywords(text);
-            //System.out.println(keywords);
+            LOG.debug("Keywords: "+keywords);
 
             Map<String,Object> queryParams = new HashMap<>();
             String kw_query = keywords.stream().map(e -> "txt_t:\"" + e + "\"").collect(Collectors.joining(" OR "));
@@ -59,6 +61,7 @@ public class ItemsService {
                     Map<String, Object> data = qd.getData();
                     if (remaining_words < 0 && data.containsKey("name_s")){
                         String value = (String) data.get("name_s");
+                        LOG.debug("Added text: " + value);
                         int num_words = value.split(" ").length;
                         remaining_words += num_words;
                         extraText += ". " + value;
@@ -67,12 +70,15 @@ public class ItemsService {
             }
 
             // read from Solr and extend query text
-
             query_text += extraText;
 
         }
 
-        //System.out.println(query_text);
+        LOG.debug("Final Query Text: " + query_text);
+
+
+        // Validate the word frequencies
+
         return librAIryClient.getItemsByText(query_text, filter);
 
     }
