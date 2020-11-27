@@ -67,6 +67,9 @@ public class LibrAIryClient {
     @Value("#{environment['LIBRAIRY_API_ENDPOINT']?:'${librairy.api.endpoint}'}")
     public String librairyEndpoint;
 
+    @Value("#{environment['LIBRAIRY_NLP_ENDPOINT']?:'${librairy.nlp.endpoint}'}")
+    public String librairyNlpEndpoint;
+
     @Value("#{environment['MODEL_ENDPOINT']?:'${librairy.model.endpoint}'}")
     public String modelEndpoint;
 
@@ -331,5 +334,35 @@ public class LibrAIryClient {
             LOG.error("Unexpected error",e);
         }
         return topics;
+    }
+
+    public Map<String,Integer> getBoW(String txt){
+
+        Map<String,Integer> bow = new HashMap<>();
+        /**
+         * {"filter": ["NOUN","VERB", "PROPER_NOUN", "ADJECTIVE"], "multigrams": False, "references": False, "synset": False, "text" : procurement_text }
+         */
+        JSONObject request = new JSONObject();
+        request.put("text", txt);
+        request.put("filter", Arrays.asList(new String[]{"NOUN","VERB","PROPER_NOUN", "ADJECTIVE"}));
+        request.put("multigram", false);
+        request.put("references", false);
+        request.put("synset", false);
+
+        List<String> keywords = new ArrayList<>();
+
+        try {
+            HttpResponse<JsonNode> result = Unirest.post(librairyNlpEndpoint+"/groups").body(request.toString()).asJson();
+            JSONArray groups = result.getBody().getObject().getJSONArray("groups");
+            for(int i=0; i< groups.length();i++){
+                JSONObject group = groups.getJSONObject(i);
+                bow.put(group.getString("token"), group.getInt("freq"));
+            }
+
+        } catch (Exception e) {
+            LOG.warn("Error discovering keywords", e);
+        }
+
+        return bow;
     }
 }

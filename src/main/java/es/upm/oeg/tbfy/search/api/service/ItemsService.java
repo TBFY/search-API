@@ -6,6 +6,7 @@ import es.upm.oeg.tbfy.search.api.model.Filter;
 import es.upm.oeg.tbfy.search.api.model.Item;
 import es.upm.oeg.tbfy.search.api.model.QueryDocument;
 import es.upm.oeg.tbfy.search.api.model.QueryDocumentList;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,8 +79,46 @@ public class ItemsService {
 
 
         // Validate the word frequencies
+        Map<String, Integer> bow = librAIryClient.getBoW(query_text);
 
-        return librAIryClient.getItemsByText(query_text, filter);
+        List<Integer> values = new ArrayList<Integer>(bow.values());
+
+        Integer maxFreq = Collections.max(values);
+        Integer freqThreshold = 0;
+
+        for (int i=0;i<maxFreq;i++){
+            final Integer currentFreq = i;
+            List<Integer> partialValues = values.stream().filter(a -> a > currentFreq).collect(Collectors.toList());
+            double mean = partialValues.stream().mapToInt(Integer::intValue).average().getAsDouble();
+            double median = partialValues.stream().sorted().skip(Math.max(0, ((partialValues.size() + 1) / 2) - 1))
+                    .limit(1 + (1 + partialValues.size()) % 2).mapToInt(Integer::intValue).average().getAsDouble();
+            double variance = partialValues.stream()
+                    .map(j -> j - mean)
+                    .map(j -> j*j)
+                    .mapToDouble(j -> j).average().getAsDouble();
+
+
+            boolean isOptimal = ((variance + median) > maxFreq) && ((maxFreq / 2) < mean);
+            if (isOptimal){
+                freqThreshold = currentFreq;
+                break;
+            }
+        }
+
+        LOG.info("Min frequency threshold is: " + freqThreshold);
+
+        StringBuilder optimized_text = new StringBuilder();
+
+        for (String key: bow.keySet()){
+            Integer freq = bow.get(key);
+            if (freq > freqThreshold){
+                optimized_text.append(" ").append(StringUtils.repeat(key," ", freq));
+            }
+        }
+
+        String extendedText = optimized_text.toString();
+
+        return librAIryClient.getItemsByText(extendedText, filter);
 
     }
 
